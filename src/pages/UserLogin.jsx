@@ -1,39 +1,66 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useContext, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { UserDataContext } from '../context/UserContext';
+import axios from 'axios';
 
 function UserLogin() {
+  // Local state for form fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [userData, setUserData] = useState({});
 
-  const submitHandler = (e) => {
-    e.preventDefault();
+  // Access global user context
+  const { user, setUser } = useContext(UserDataContext); 
+  const navigate = useNavigate(); 
+
+  // Handles form submission
+  const submitHandler = async (e) => {
+    e.preventDefault(); 
 
     const submittedData = {
-      userEmail: email,
-      userPassword: password
+      email,
+      password
     };
 
-    setUserData(submittedData); // optional if storing locally
-    console.log(submittedData);
+    setUserData(submittedData); // Optional: store form data locally
 
-    setEmail('');
-    setPassword('');
+    try {
+      // Send login request to backend
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/user/login`, submittedData, { withCredentials:true });
+      const data = response.data;
+
+      // Update user context and store token
+      setUser({
+        email: data.data.user.email,
+        fullname: data.data.user.fullname
+      });
+      localStorage.setItem('userToken', data.data.token);
+
+      // Navigate to profile on success
+      navigate("/profile");
+
+      // Clear input fields
+      setEmail('');
+      setPassword('');
+    } catch (error) {
+      console.log("Login error", error);
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col justify-between items-center p-6 sm:p-8 bg-gray-50">
-      
+
+      {/* Page header */}
       <div className="flex flex-col items-center w-full max-w-md">
-        
-        {/* Header with badge */}
         <h1 className="text-5xl font-bold text-black pt-5 tracking-widest mb-1 flex items-center gap-2">
           Ridee <span className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded-full">User</span>
         </h1>
         <p className="text-sm text-gray-500 font-medium mb-6 mt-1">Welcome back, rider</p>
 
-        {/* Login Form */}
+        {/* Login form */}
         <form onSubmit={submitHandler} className="w-full space-y-6">
+
+          {/* Email field */}
           <div>
             <label htmlFor="userEmail" className="block text-sm sm:text-base font-medium text-gray-700 mb-1">
               What's your email?
@@ -49,6 +76,7 @@ function UserLogin() {
             />
           </div>
 
+          {/* Password field */}
           <div>
             <label htmlFor="userPassword" className="block text-sm sm:text-base font-medium text-gray-700 mb-1">
               Enter password
@@ -64,6 +92,7 @@ function UserLogin() {
             />
           </div>
 
+          {/* Submit button */}
           <button
             type="submit"
             className="w-full bg-black text-white font-semibold rounded-lg py-2 hover:bg-gray-800 transition-colors duration-200 text-lg"
@@ -72,7 +101,7 @@ function UserLogin() {
           </button>
         </form>
 
-        {/* Registration Link */}
+        {/* Link to registration */}
         <p className="mt-6 text-sm sm:text-base font-medium">
           Join a fleet?{" "}
           <Link to="/register" className="text-blue-600 font-semibold hover:underline">
@@ -81,7 +110,7 @@ function UserLogin() {
         </p>
       </div>
 
-      {/* Switch to Captain login */}
+      {/* Alternate captain login button */}
       <div className="w-full max-w-md mt-10 mb-6">
         <Link to="/captain-login">
           <button className="w-full bg-green-600 text-white font-semibold rounded-lg py-2 text-lg hover:bg-green-700 transition-colors duration-200">
