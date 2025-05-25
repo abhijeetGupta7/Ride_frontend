@@ -1,20 +1,59 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import axios from "axios";
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { CaptainDataContext } from "../context/CaptainContext";
 
 function CaptainLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [captainData, setCaptainData] = useState({});
+  const { captain, setCaptain } = useContext(CaptainDataContext);
+  const navigate = useNavigate();
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    setCaptainData({
-      captainEmail: email,
-      captainPassword: password
-    });
-    setEmail('');
-    setPassword('');
+    
+    const submittedData = {
+      email,
+      password
+    };
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/captain/login`, 
+        submittedData,
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        const data = response.data.data.captain;
+        const captainInfo = {
+          fullname: {
+            firstname: data.fullname.firstname,
+            lastname: data.fullname.lastname || ''
+          },
+          email: data.email,
+          vehicle: {
+            color: data.vehicle.color,
+            plate: data.vehicle.plate,
+            capacity: data.vehicle.capacity,
+            vehicleType: data.vehicle.vehicleType
+          }
+        };
+        
+        setCaptain(captainInfo);
+        localStorage.setItem('captainToken', response.data.token);
+        navigate("/captain-profile");
+      }
+    } catch (error) {
+      // Add user-friendly error handling here
+      console.log(`login failed`,error);
+    } finally {
+      setEmail('');
+      setPassword('');
+    }
   };
+    
+
 
   return (
     <div className="min-h-screen flex flex-col justify-between items-center p-6 sm:p-8 bg-gray-50">

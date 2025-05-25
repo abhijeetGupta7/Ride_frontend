@@ -1,24 +1,29 @@
-import { useEffect } from "react"
-import { logoutUser } from "../utils/logoutUser"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useContext, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { logoutUser } from "../utils/logoutUser";
+import { UserDataContext } from "../context/UserContext";
+
 
 const UserLogout = () => {
-    const navigate=useNavigate();
-    useEffect( () => {
-        const doLogout =  async () => {
-            const result=await logoutUser();
-            if(result.success) {
-                navigate('/login');
-            }
-        }
+  const { setUser } = useContext(UserDataContext);
+  const navigate = useNavigate();
+  const hasLoggedOut = useRef(false);
 
-        doLogout();
+  useEffect(() => {
+    const doLogout = async () => {
+      if (hasLoggedOut.current) return; // Prevent multiple logouts, bcz in strict mode, useEffect runs twice  
 
-    }, [navigate]);
+      hasLoggedOut.current = true;
+      const result = await logoutUser();
+      if (result.success) {
+        setUser(null); 
+        navigate('/login');
+      }
+    };
+    doLogout();
+  }, [navigate, setUser]);
 
-    return (
-        <div> Logging you out ...</div>
-    )    
-}
+  return <div>Logging out...</div>;
+};
 
 export default UserLogout;

@@ -30,6 +30,7 @@ const UserProtectedWrapper = ({ children }) => {
       .catch((err) => {
         // If error occurs (unauthorized, token expired, etc.)
         console.error("Authentication error:", err);
+        setUser(null); // Clear user context
         localStorage.removeItem("userToken"); 
         navigate("/login"); 
       })

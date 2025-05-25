@@ -3,6 +3,7 @@ import axios from "axios";
 export const logoutUser = async () => {
   const userToken = localStorage.getItem("userToken");
 
+  
   try {
     const response = await axios.post(
       `${import.meta.env.VITE_API_BASE_URL}/user/logout`,
