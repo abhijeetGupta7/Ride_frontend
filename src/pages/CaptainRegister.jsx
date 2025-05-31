@@ -13,7 +13,8 @@ function CaptainRegister() {
   const [color, setColor] = useState("");
   const [plate, setPlate] = useState("");
   const [capacity, setCapacity] = useState("");
-  
+  const [error, setError] = useState(null);
+
   // Access global captain context
   const {captain,setCaptain}=useContext(CaptainDataContext);
   const navigate=useNavigate();
@@ -65,16 +66,11 @@ function CaptainRegister() {
       }
     } catch (error) {
       console.log(error);
-    } finally {
-      // Clear input fields after submission
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setPassword("");
-      setColor("");
-      setPlate("");
-      setCapacity("");
-      setVehicleType("car");
+      if(error.status === HttpStatusCode.Conflict) {
+        setError("Email already registered.");
+      } else {
+        setError("Registration failed. Something went wrong.");
+      }
     }
   };
 
@@ -194,6 +190,14 @@ function CaptainRegister() {
           >
             Register
           </button>
+
+          {/* Error message */}
+          {error && (
+            <p className="text-red-600 text-sm font-semibold text-center">
+              {error}
+            </p>
+          )}
+
         </form>
 
         {/* Link to login */}

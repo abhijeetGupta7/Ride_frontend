@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CaptainDataContext } from "../context/CaptainContext";
@@ -7,6 +7,8 @@ function CaptainLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { captain, setCaptain } = useContext(CaptainDataContext);
+  const [error, setError] = useState(null); 
+
   const navigate = useNavigate();
 
   const submitHandler = async (e) => {
@@ -47,10 +49,12 @@ function CaptainLogin() {
     } catch (error) {
       // Add user-friendly error handling here
       console.log(`login failed`,error);
-    } finally {
-      setEmail('');
-      setPassword('');
-    }
+      if (error.status === HttpStatusCode.Unauthorized) {
+        setError("Invalid email or password.");
+      } else {
+        setError("An unexpected error occurred. Please try again later.");
+      }
+    } 
   };
     
 
@@ -104,6 +108,15 @@ function CaptainLogin() {
           >
             Login
           </button>
+
+          {
+            error && (
+              <p className="text-red-600 text-sm font-semibold text-center">
+                {error}
+              </p>
+            )
+          }
+
         </form>
 
         {/* Registration Link */}

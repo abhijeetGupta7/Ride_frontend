@@ -10,6 +10,7 @@ function UserRegister() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [userData, setUserData] = useState({});  
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -63,6 +64,11 @@ function UserRegister() {
         status: error.response?.status,
         headers: error.response?.headers
       });
+      if(error.status === HttpStatusCode.Conflict) {
+        setError("Email already registered.");
+      } else {
+        setError(`Registration falied. Something went wrong`);
+      }       
     }
   };
 
@@ -141,6 +147,12 @@ function UserRegister() {
           >
             Register
           </button>
+
+          {/* Error message */}
+          {
+            error && <p className="text-red-600 text-sm font-semibold text-center">{error}</p>
+          }
+
         </form>
 
         {/* Redirect to login */}

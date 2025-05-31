@@ -1,13 +1,14 @@
 import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserDataContext } from '../context/UserContext';
-import axios from 'axios';
+import axios, { HttpStatusCode } from 'axios';
 
 function UserLogin() {
   // Local state for form fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [userData, setUserData] = useState({});
+  const [error, setError] = useState(null);
 
   // Access global user context
   const { user, setUser } = useContext(UserDataContext); 
@@ -44,6 +45,11 @@ function UserLogin() {
       setPassword('');
     } catch (error) {
       console.log("Login error", error);
+      if(error.status === HttpStatusCode.Unauthorized) {
+        setError("Invalid email or password.");
+      } else {
+        setError("An unexpected error occurred. Please try again later.");
+      }
     }
   };
 
@@ -99,6 +105,14 @@ function UserLogin() {
           >
             Login
           </button>
+
+          {/* Error message */}
+          {error && (
+            <p className="text-red-600 text-sm font-semibold text-center">
+              {error}
+            </p>
+          )}
+
         </form>
 
         {/* Link to registration */}
