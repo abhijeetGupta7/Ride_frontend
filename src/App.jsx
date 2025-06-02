@@ -7,20 +7,32 @@ import CaptainRegister from "./pages/CaptainRegister.jsx";
 import Profile from "./pages/Profile.jsx";
 import UserProtectedWrapper from "./components/UserProtectedComponent.jsx";
 import UserLogout from "./pages/UserLogout.jsx";
-import CaptainHome from "./pages/CaptainProfile.jsx";
 import CaptainLogout from "./pages/CaptainLogout.jsx";
 import CaptainProtectedWrapper from "./components/CaptainProtectedComponent.jsx";
 import UserDashboard from "./pages/UserDashboard.jsx";
-import A from "./pages/A.jsx";
+import Riding from "./pages/Riding.jsx";
+import CaptainProfile from "./pages/CaptainProfile.jsx";
+import CaptainHome from "./pages/CaptainHome.jsx";
+import CaptainRiding from "./pages/CaptainRiding.jsx";
 
 export default function App() {
   return (
     <div>
       <Routes>
-        <Route path="/a" element={<A/>} />
         <Route path="/profile" element={
           <UserProtectedWrapper> 
             <Profile /> 
+          </UserProtectedWrapper> } 
+         />
+        <Route path="/user/dashboard" element={
+          <UserProtectedWrapper>
+            <UserDashboard/>
+          </UserProtectedWrapper>
+          }
+        />
+        <Route path="/riding" element={
+          <UserProtectedWrapper> 
+            <Riding /> 
           </UserProtectedWrapper> } 
          />
         <Route path="/" element={<Home />} />
@@ -32,12 +44,26 @@ export default function App() {
         
         <Route path="/captain-profile" element={ 
           <CaptainProtectedWrapper> 
-            <CaptainHome/> 
+            <CaptainProfile/> 
+          </CaptainProtectedWrapper>
+          }/>
+
+          <Route path="/captain-home" element={ 
+          <CaptainProtectedWrapper> 
+            <CaptainHome/>  
+          </CaptainProtectedWrapper>
+          }/>
+
+          <Route path="/captain-riding" element={ 
+          <CaptainProtectedWrapper> 
+            <CaptainRiding/>  
           </CaptainProtectedWrapper>
           }/>
           
+          
         <Route path="/captain-logout" element={<CaptainLogout/>}/>
-        <Route path="/user/dashboard" element={<UserDashboard/>}/>
+
+
       </Routes>
     </div>
   )

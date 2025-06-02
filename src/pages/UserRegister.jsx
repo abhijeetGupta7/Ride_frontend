@@ -47,7 +47,7 @@ function UserRegister() {
         };
         setUser(userData); // Update context
         localStorage.setItem('userToken', data.data.token); // Store token
-        navigate("/profile"); // Redirect to profile
+        navigate("/user/dashboard"); // Redirect to profile
       }
 
       // Reset form inputs

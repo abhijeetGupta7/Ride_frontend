@@ -1,11 +1,9 @@
 import CaptainLogoutButton from "../components/CaptainLogoutButton";
-import { logoutCaptain } from "../utils/logoutCaptain";
 
-export default function CaptainHome() {
+export default function CaptainProfile() {
   return (
     <div>
       CaptainHome
-
       <CaptainLogoutButton />
     </div>
   )

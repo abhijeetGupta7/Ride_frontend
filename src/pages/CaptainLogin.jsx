@@ -44,7 +44,7 @@ function CaptainLogin() {
         
         setCaptain(captainInfo);
         localStorage.setItem('captainToken', response.data.token);
-        navigate("/captain-profile");
+        navigate("/captain-home");
       }
     } catch (error) {
       // Add user-friendly error handling here

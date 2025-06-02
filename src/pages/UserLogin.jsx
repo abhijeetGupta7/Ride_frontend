@@ -38,7 +38,7 @@ function UserLogin() {
       localStorage.setItem('userToken', data.data.token);
 
       // Navigate to profile on success
-      navigate("/profile");
+      navigate("/user/dashboard");
 
       // Clear input fields
       setEmail('');
