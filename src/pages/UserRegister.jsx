@@ -43,7 +43,8 @@ function UserRegister() {
       if (response.status === HttpStatusCode.Created) {
         const userData = {
           email: data.data.user.email,
-          fullname: data.data.user.fullname
+          fullname: data.data.user.fullname,
+          id:data.data.user._id
         };
         setUser(userData); // Update context
         localStorage.setItem('userToken', data.data.token); // Store token

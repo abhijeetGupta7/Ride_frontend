@@ -33,7 +33,8 @@ function UserLogin() {
       // Update user context and store token
       setUser({
         email: data.data.user.email,
-        fullname: data.data.user.fullname
+        fullname: data.data.user.fullname,
+        id:data.data.user._id
       });
       localStorage.setItem('userToken', data.data.token);
 

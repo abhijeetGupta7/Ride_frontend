@@ -10,7 +10,9 @@ const LocationSearchPanel = React.forwardRef(
       suggestions,
       handleLocationSelect,
       panelCloseRef,
-      onClose
+      onClose,
+      locationSearchQuery,
+      setLocationSearchQuery
     },
     panelRef
   ) => (
@@ -47,6 +49,8 @@ const LocationSearchPanel = React.forwardRef(
           }
           className="w-full pl-12 pr-4 py-3 border-gray-300 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           autoFocus
+          onChange={ (e) => setLocationSearchQuery(e.target.value) }
+          value={locationSearchQuery}
         />
       </div>
 

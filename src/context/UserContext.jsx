@@ -9,7 +9,8 @@ const UserContext = ({children}) => {
         fullname: {
             firstname:'',
             lastname:''
-        }
+        },
+        id:null
     })
 
     return (

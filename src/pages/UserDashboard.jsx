@@ -1,6 +1,6 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import TopBar from "../components/TopBar";
 import MainLocationPanel from "../components/MainLocationPanel";
 import LocationSearchPanel from "../components/LocationSearchPanel";
@@ -8,14 +8,17 @@ import VehicleSelectionPanel from "../components/VehicleSelectionPanel";
 import WaitingForDriverPanel from "../components/WaitingForDriverPanel";
 import DriverComingPanel from "../components/DriverComingPanel";
 import { useNavigate } from "react-router-dom";
+import { createRide, getAutoCompleteSuggestions, getTripFareDistanceDurationForAllVehicleTypes } from "../apis/map.api";
+import { VEHICLE_TYPES } from "../constants/vehicleTypes";
+import { SocketContext } from "../context/SocketContext";
+import { UserDataContext } from "../context/UserContext";
 
 const UserDashboard = () => {
-
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   // -------------------- State Management --------------------
-  const [pickup, setPickup] = useState('');
-  const [destination, setDestination] = useState('');
+  const [pickup, setPickup] = useState("");
+  const [destination, setDestination] = useState("");
   const [panelOpen, setPanelOpen] = useState(false);
   const [activeField, setActiveField] = useState(null);
   const [showVehiclePanel, setShowVehiclePanel] = useState(false);
@@ -23,7 +26,39 @@ const UserDashboard = () => {
   const [waitingForDriver, setWaitingForDriver] = useState(false);
   const [driverFound, setDriverFound] = useState(false);
   const [driverDetails, setDriverDetails] = useState(null);
-  const [driverStatus, setDriverStatus] = useState('null'); // null | 'searching' | 'coming' | 'arrived' | riding
+  const [driverStatus, setDriverStatus] = useState("null"); // null | 'searching' | 'coming' | 'arrived' | riding
+
+  const [locationSearchQuery, setLocationSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [vehicles, setVehicles]=useState([])
+
+  const socket=useContext(SocketContext);
+  const {user,setUser}=useContext(UserDataContext); 
+
+  // Setting Socket id for user
+  useEffect(()=> {
+    if(socket) socket.emit('join', {userType:'user', userId:user.id});
+  },[user])
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      async function getSuggestions() {
+        if (!locationSearchQuery.trim()) {
+          setSuggestions([]);
+          return;
+        }
+        const places = await getAutoCompleteSuggestions(locationSearchQuery);
+        setSuggestions(places);
+      }
+
+      getSuggestions();
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [locationSearchQuery]);
+
 
   // -------------------- Refs for Animation --------------------
   const panelRef = useRef();
@@ -31,60 +66,41 @@ const UserDashboard = () => {
   const vehiclePanelRef = useRef();
   const waitingPanelRef = useRef();
 
-  // -------------------- Mock Data --------------------
-  const suggestions = [
-    "Jalan Kishaya Siyah",
-    "Kampung Bali",
-    "Thamel, Kathmandu",
-    "Patan Durbar Square",
-  ];
-
-  const vehicles = [
-    {
-      id: 1,
-      type: "Bike",
-      eta: "2 min",
-      price: 200,
-      image: "https://cdn-icons-png.flaticon.com/512/2972/2972185.png",
-      available: true
-    },
-    {
-      id: 2,
-      type: "Car",
-      eta: "5 min",
-      price: 400,
-      image: "https://cdn-icons-png.flaticon.com/512/3079/3079021.png",
-      available: true
-    },
-    {
-      id: 3,
-      type: "Premium",
-      eta: "8 min",
-      price: 600,
-      image: "https://cdn-icons-png.flaticon.com/512/3079/3079097.png",
-      available: false
-    }
-  ];
-
   // -------------------- Event Handlers --------------------
   const handleLocationSelect = (location) => {
-    activeField === 'pickup' ? setPickup(location) : setDestination(location);
+    activeField === "pickup" ? setPickup(location) : setDestination(location);
     setPanelOpen(false);
   };
 
-  const handleFindTrip = () => {
-    if (pickup && destination) setShowVehiclePanel(true);
+  const handleFindTrip = async () => {
+    if (pickup && destination) {
+      setShowVehiclePanel(true);
+      const vehicleData=await getTripFareDistanceDurationForAllVehicleTypes(pickup, destination);
+      const mergedVehicleData = VEHICLE_TYPES.map( staticVehicle => {
+        const key=staticVehicle.type;
+        const dynamic = vehicleData && vehicleData[key];
+        return {
+          ...staticVehicle,
+          fare: dynamic ? dynamic.fare : null,
+          distance: dynamic ? dynamic.raw.distance.text : null,
+          duration: dynamic ? dynamic.raw.duration.text : null,
+          available: !!dynamic,
+        }
+      })
+      setVehicles(mergedVehicleData)
+    }
   };
-
+  
   const handleVehicleSelect = (vehicle) => {
     if (vehicle.available) setSelectedVehicle(vehicle);
   };
 
-  const confirmRide = () => {
+  const confirmRide = async() => {
+    await createRide(pickup, destination, selectedVehicle.type);
     setShowVehiclePanel(false);
-    setWaitingForDriver(true);    // set Searching for driver(true)
-    setDriverStatus('searching');
-    
+    setWaitingForDriver(true); // set Searching for driver(true)
+    setDriverStatus("searching");
+
     // Mock driver search (replace with actual API call)
     setTimeout(() => {
       setDriverFound(true);
@@ -94,7 +110,7 @@ const UserDashboard = () => {
         vehicle: selectedVehicle.type,
         eta: "3 min",
         distance: "0.8 km",
-        plateNumber: "DL5SAB1234"
+        plateNumber: "DL5SAB1234",
       });
     }, 3000);
   };
@@ -102,29 +118,29 @@ const UserDashboard = () => {
   const cancelSearch = () => {
     setWaitingForDriver(false);
     setDriverFound(false);
-    setDriverStatus(null)
+    setDriverStatus(null);
   };
 
   // -------------------- Animation Logic --------------------
   // Location panel animation
   useGSAP(() => {
     gsap.to(panelRef.current, {
-      y: panelOpen ? 0 : '100%',
+      y: panelOpen ? 0 : "100%",
       duration: 0.5,
-      ease: 'power3.out'
+      ease: "power3.out",
     });
     gsap.to(panelCloseRef.current, {
       opacity: panelOpen ? 1 : 0,
-      duration: 0.3
+      duration: 0.3,
     });
   }, [panelOpen]);
 
   // Vehicle panel animation
   useGSAP(() => {
     gsap.to(vehiclePanelRef.current, {
-      y: showVehiclePanel ? 0 : '100%',
+      y: showVehiclePanel ? 0 : "100%",
       duration: 0.5,
-      ease: showVehiclePanel ? 'power3.out' : 'power3.in'
+      ease: showVehiclePanel ? "power3.out" : "power3.in",
     });
   }, [showVehiclePanel]);
 
@@ -132,9 +148,9 @@ const UserDashboard = () => {
   useGSAP(() => {
     if (waitingForDriver) {
       gsap.from(waitingPanelRef.current, {
-        y: '100%',
+        y: "100%",
         duration: 0.5,
-        ease: 'power3.out'
+        ease: "power3.out",
       });
     }
   }, [waitingForDriver]);
@@ -142,7 +158,7 @@ const UserDashboard = () => {
   // -------------------- Render --------------------
   return (
     <div className="relative h-screen overflow-hidden bg-gray-100">
-      {/* Top Navigation */}      
+      {/* Top Navigation */}
       <TopBar />
 
       {/* Map Placeholder */}
@@ -154,11 +170,17 @@ const UserDashboard = () => {
       <MainLocationPanel
         pickup={pickup}
         destination={destination}
-        onPickupClick={() => { setActiveField("pickup"); setPanelOpen(true); }}
-        onDestinationClick={() => { setActiveField("destination"); setPanelOpen(true); }}
+        onPickupClick={() => {
+          setActiveField("pickup");
+          setPanelOpen(true);
+        }}
+        onDestinationClick={() => {
+          setActiveField("destination");
+          setPanelOpen(true);
+        }}
         onFindTrip={handleFindTrip}
       />
-      
+
       {/* Location Search Panel */}
       <LocationSearchPanel
         ref={panelRef}
@@ -167,6 +189,8 @@ const UserDashboard = () => {
         handleLocationSelect={handleLocationSelect}
         panelCloseRef={panelCloseRef}
         onClose={() => setPanelOpen(false)}
+        locationSearchQuery={locationSearchQuery}
+        setLocationSearchQuery={setLocationSearchQuery}
       />
 
       {/* Vehicle Selection Panel */}
@@ -180,8 +204,8 @@ const UserDashboard = () => {
       />
 
       {/* Searching for driver */}
-      {/* Waiting/Driver Found Panel */}   
-      {driverStatus==='searching' && (
+      {/* Waiting/Driver Found Panel */}
+      {driverStatus === "searching" && (
         <WaitingForDriverPanel
           waitingPanelRef={waitingPanelRef}
           driverFound={driverFound}
@@ -195,56 +219,48 @@ const UserDashboard = () => {
         />
       )}
 
-      {
-        driverStatus==='coming' && (
-          <DriverComingPanel
-            driverDetails={driverDetails}
-            onCancel={cancelSearch}
-            setDriverStatus={setDriverStatus}
-          />
-        )
-      }
+      {driverStatus === "coming" && (
+        <DriverComingPanel
+          driverDetails={driverDetails}
+          onCancel={cancelSearch}
+          setDriverStatus={setDriverStatus}
+        />
+      )}
 
-      {driverStatus === 'arrived' && (
-      <div className="fixed bottom-0 p-4 left-0 right-0 bg-white rounded-t-3xl shadow-xl z-70">
-        <h2 className="text-xl font-bold mb-4">Your driver has arrived!</h2>
-        <div className="mb-4 text-lg">
-        <p className="font-bold">{driverDetails.name}</p>
-        <p className="text-gray-600">{driverDetails.vehicle} • {driverDetails.plateNumber}</p>
-        <p className="text-gray-600">Rating: {driverDetails.rating}</p>
-      </div>
+      {driverStatus === "arrived" && (
+        <div className="fixed bottom-0 p-4 left-0 right-0 bg-white rounded-t-3xl shadow-xl z-70">
+          <h2 className="text-xl font-bold mb-4">Your driver has arrived!</h2>
+          <div className="mb-4 text-lg">
+            <p className="font-bold">{driverDetails.name}</p>
+            <p className="text-gray-600">
+              {driverDetails.vehicle} • {driverDetails.plateNumber}
+            </p>
+            <p className="text-gray-600">Rating: {driverDetails.rating}</p>
+          </div>
 
-    <div className="font-bold p-5 text-lg">
-      <h2> <span className="text-blue-600"> Pickup </span> : {pickup}</h2>
-      <h2> <span className="text-green-900"> Destination: </span> {destination}</h2>
-    </div>
+          <div className="font-bold p-5 text-lg">
+            <h2>
+              {" "}
+              <span className="text-blue-600"> Pickup </span> : {pickup}
+            </h2>
+            <h2>
+              {" "}
+              <span className="text-green-900"> Destination: </span>{" "}
+              {destination}
+            </h2>
+          </div>
 
-    <button
-      className="w-full bg-green-600 text-white py-3 rounded-xl font-bold"
-      onClick={() => {
-        setDriverStatus('riding') 
-        navigate('/riding')
-      }}
-    >
-      Start Ride
-    </button>
-  </div>
-)}
-
-
-     
-
-
-
-      
-      
-
-
-
-
-
-  
-      
+          <button
+            className="w-full bg-green-600 text-white py-3 rounded-xl font-bold"
+            onClick={() => {
+              setDriverStatus("riding");
+              navigate("/riding");
+            }}
+          >
+            Start Ride
+          </button>
+        </div>
+      )}
     </div>
   );
 };

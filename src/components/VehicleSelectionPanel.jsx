@@ -47,13 +47,13 @@ const VehicleSelectionPanel = ({
               />
               <div>
                 <p className="font-semibold">{vehicle.type}</p>
-                <p className="text-sm text-gray-500">{vehicle.eta} away</p>
+                <p className="text-sm text-gray-500">{vehicle.distance} away</p>
                 {!vehicle.available && (
                   <p className="text-xs text-red-500">Not available</p>
                 )}
               </div>
             </div>
-            <p className="font-bold">Rs. {vehicle.price}</p>
+            <p className="font-bold">Rs. {vehicle.fare}</p>
           </div>
         ))}
       </div>
@@ -65,7 +65,7 @@ const VehicleSelectionPanel = ({
             className="w-full bg-black text-white py-3 rounded-xl font-bold"
             onClick={onConfirm}
           >
-            Confirm {selectedVehicle.type} (Rs. {selectedVehicle.price})
+            Confirm {selectedVehicle.type} (Rs. {selectedVehicle.fare})
           </button>
         </div>
       )}

@@ -57,7 +57,8 @@ function CaptainRegister() {
             plate:data.vehicle.plate,
             capacity:data.vehicle.capacity,
             vehicleType:data.vehicle.vehicleType
-          }
+          },
+          id:data._id
         }
         setCaptain(captainData); 
         localStorage.setItem("captainToken", response.data.token);
