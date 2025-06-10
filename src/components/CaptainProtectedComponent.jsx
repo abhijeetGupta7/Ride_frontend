@@ -33,7 +33,8 @@ const CaptainProtectedWrapper = ({ children }) => {
                         plate: data.vehicle.plate,
                         capacity: data.vehicle.capacity,
                         vehicleType: data.vehicle.vehicleType
-                    }
+                    },
+                    id:data._id
                 });
             }
         })

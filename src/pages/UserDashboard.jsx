@@ -5,13 +5,17 @@ import TopBar from "../components/TopBar";
 import MainLocationPanel from "../components/MainLocationPanel";
 import LocationSearchPanel from "../components/LocationSearchPanel";
 import VehicleSelectionPanel from "../components/VehicleSelectionPanel";
-import WaitingForDriverPanel from "../components/WaitingForDriverPanel";
 import DriverComingPanel from "../components/DriverComingPanel";
 import { useNavigate } from "react-router-dom";
-import { createRide, getAutoCompleteSuggestions, getTripFareDistanceDurationForAllVehicleTypes } from "../apis/map.api";
+import {
+  createRide,
+  getAutoCompleteSuggestions,
+  getTripFareDistanceDurationForAllVehicleTypes,
+} from "../apis/map.api";
 import { VEHICLE_TYPES } from "../constants/vehicleTypes";
 import { SocketContext } from "../context/SocketContext";
 import { UserDataContext } from "../context/UserContext";
+import SearchingForDriverPanel from "../components/SearchingForDriverPanel";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -25,20 +29,20 @@ const UserDashboard = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [waitingForDriver, setWaitingForDriver] = useState(false);
   const [driverFound, setDriverFound] = useState(false);
-  const [driverDetails, setDriverDetails] = useState(null);
-  const [driverStatus, setDriverStatus] = useState("null"); // null | 'searching' | 'coming' | 'arrived' | riding
+  const [rideDetails, setRideDetails] = useState(null); // <-- use this for all ride/driver info
+  const [driverStatus, setDriverStatus] = useState("null"); // null | 'searching' | 'coming' | riding
 
   const [locationSearchQuery, setLocationSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [vehicles, setVehicles]=useState([])
+  const [vehicles, setVehicles] = useState([]);
 
-  const socket=useContext(SocketContext);
-  const {user,setUser}=useContext(UserDataContext); 
+  const socket = useContext(SocketContext);
+  const { user, setUser } = useContext(UserDataContext);
 
   // Setting Socket id for user
-  useEffect(()=> {
-    if(socket) socket.emit('join', {userType:'user', userId:user.id});
-  },[user])
+  useEffect(() => {
+    if (socket) socket.emit("join", { userType: "user", userId: user.id });
+  }, [socket, user]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -59,7 +63,6 @@ const UserDashboard = () => {
     };
   }, [locationSearchQuery]);
 
-
   // -------------------- Refs for Animation --------------------
   const panelRef = useRef();
   const panelCloseRef = useRef();
@@ -75,9 +78,12 @@ const UserDashboard = () => {
   const handleFindTrip = async () => {
     if (pickup && destination) {
       setShowVehiclePanel(true);
-      const vehicleData=await getTripFareDistanceDurationForAllVehicleTypes(pickup, destination);
-      const mergedVehicleData = VEHICLE_TYPES.map( staticVehicle => {
-        const key=staticVehicle.type;
+      const vehicleData = await getTripFareDistanceDurationForAllVehicleTypes(
+        pickup,
+        destination
+      );
+      const mergedVehicleData = VEHICLE_TYPES.map((staticVehicle) => {
+        const key = staticVehicle.type;
         const dynamic = vehicleData && vehicleData[key];
         return {
           ...staticVehicle,
@@ -85,44 +91,66 @@ const UserDashboard = () => {
           distance: dynamic ? dynamic.raw.distance.text : null,
           duration: dynamic ? dynamic.raw.duration.text : null,
           available: !!dynamic,
-        }
-      })
-      setVehicles(mergedVehicleData)
+        };
+      });
+      setVehicles(mergedVehicleData);
     }
   };
-  
+
   const handleVehicleSelect = (vehicle) => {
     if (vehicle.available) setSelectedVehicle(vehicle);
   };
 
-  const confirmRide = async() => {
+  const confirmRide = async () => {
     await createRide(pickup, destination, selectedVehicle.type);
     setShowVehiclePanel(false);
     setWaitingForDriver(true); // set Searching for driver(true)
     setDriverStatus("searching");
-
-    // Mock driver search (replace with actual API call)
-    setTimeout(() => {
-      setDriverFound(true);
-      setDriverDetails({
-        name: "Rajesh Kumar",
-        rating: 4.8,
-        vehicle: selectedVehicle.type,
-        eta: "3 min",
-        distance: "0.8 km",
-        plateNumber: "DL5SAB1234",
-      });
-    }, 3000);
   };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleDriverFound = (data) => {
+      // data is the full ride object from backend
+      console.log("driver is found");
+      setDriverFound(true);
+      setRideDetails(data);
+      setDriverStatus("coming");
+    };
+
+    socket.on("driver-found", handleDriverFound);
+
+    return () => {
+      socket.off("driver-found", handleDriverFound);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleRideStarted = (data) => {
+      setRideDetails(data);
+      console.log("ride started");
+      setDriverStatus("riding");
+      navigate("/riding");
+    };
+
+    socket.on("ride-started", handleRideStarted);
+
+    return () => {
+      socket.off("ride-started", handleRideStarted); // ✅ Proper cleanup
+    };
+  }, [socket, navigate]);
 
   const cancelSearch = () => {
     setWaitingForDriver(false);
     setDriverFound(false);
     setDriverStatus(null);
+    setRideDetails(null);
   };
 
   // -------------------- Animation Logic --------------------
-  // Location panel animation
   useGSAP(() => {
     gsap.to(panelRef.current, {
       y: panelOpen ? 0 : "100%",
@@ -135,7 +163,6 @@ const UserDashboard = () => {
     });
   }, [panelOpen]);
 
-  // Vehicle panel animation
   useGSAP(() => {
     gsap.to(vehiclePanelRef.current, {
       y: showVehiclePanel ? 0 : "100%",
@@ -144,7 +171,6 @@ const UserDashboard = () => {
     });
   }, [showVehiclePanel]);
 
-  // Waiting panel animation
   useGSAP(() => {
     if (waitingForDriver) {
       gsap.from(waitingPanelRef.current, {
@@ -204,62 +230,23 @@ const UserDashboard = () => {
       />
 
       {/* Searching for driver */}
-      {/* Waiting/Driver Found Panel */}
       {driverStatus === "searching" && (
-        <WaitingForDriverPanel
+        <SearchingForDriverPanel
           waitingPanelRef={waitingPanelRef}
-          driverFound={driverFound}
-          setDriverFound={setDriverFound}
           pickup={pickup}
           destination={destination}
           selectedVehicle={selectedVehicle}
-          driverDetails={driverDetails}
           cancelSearch={cancelSearch}
-          setDriverStatus={setDriverStatus}
         />
       )}
 
-      {driverStatus === "coming" && (
+      {/* Driver Coming Panel */}
+      {driverStatus === "coming" && rideDetails && (
         <DriverComingPanel
-          driverDetails={driverDetails}
+          rideDetails={rideDetails}
           onCancel={cancelSearch}
           setDriverStatus={setDriverStatus}
         />
-      )}
-
-      {driverStatus === "arrived" && (
-        <div className="fixed bottom-0 p-4 left-0 right-0 bg-white rounded-t-3xl shadow-xl z-70">
-          <h2 className="text-xl font-bold mb-4">Your driver has arrived!</h2>
-          <div className="mb-4 text-lg">
-            <p className="font-bold">{driverDetails.name}</p>
-            <p className="text-gray-600">
-              {driverDetails.vehicle} • {driverDetails.plateNumber}
-            </p>
-            <p className="text-gray-600">Rating: {driverDetails.rating}</p>
-          </div>
-
-          <div className="font-bold p-5 text-lg">
-            <h2>
-              {" "}
-              <span className="text-blue-600"> Pickup </span> : {pickup}
-            </h2>
-            <h2>
-              {" "}
-              <span className="text-green-900"> Destination: </span>{" "}
-              {destination}
-            </h2>
-          </div>
-
-          <button
-            className="w-full bg-green-600 text-white py-3 rounded-xl font-bold"
-            onClick={() => {
-              setDriverStatus("riding");
-              navigate("/riding");
-            }}
-          >
-            Start Ride
-          </button>
-        </div>
       )}
     </div>
   );

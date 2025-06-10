@@ -5,6 +5,7 @@ export const CaptainDataContext=createContext();
 const CaptainContext = ({children}) => {
 
     const [captain,setCaptain]=useState({
+        id:'',
         fullname: {
             firstname:'',
             lastname:''
@@ -15,7 +16,7 @@ const CaptainContext = ({children}) => {
             plate:'',
             capacity:'',
             vehicleType:''
-        }
+        },
     })
 
     return (

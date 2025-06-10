@@ -53,3 +53,27 @@ export const createRide = async (pickup, destination, vehicleType) => {
     return null;
   }
 };
+
+export const acceptRide = async ({ rideId, captainId }) => {
+  const token = localStorage.getItem('captainToken');
+  return axios.patch(
+    `${import.meta.env.VITE_API_BASE_URL}/ride/accept`,
+    { rideId, captainId },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true,
+    }
+  );
+};
+
+export const confirmRide = async ({ rideId, otp }) => {
+    const token = localStorage.getItem("captainToken");
+    return axios.patch(
+      `${import.meta.env.VITE_API_BASE_URL}/ride/start`,
+      { rideId, otp },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      }
+    );
+  };

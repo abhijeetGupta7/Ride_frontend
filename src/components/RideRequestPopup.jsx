@@ -1,9 +1,34 @@
-import { FaUser, FaMapMarkerAlt, FaMoneyBillWave, FaCheck, FaTimes } from 'react-icons/fa';
-import { IoLocationSharp } from 'react-icons/io5';
+import {
+  FaUser,
+  FaMapMarkerAlt,
+  FaMoneyBillWave,
+  FaCheck,
+  FaTimes,
+} from "react-icons/fa";
+import { IoLocationSharp } from "react-icons/io5";
 
-function RideRequestPopup({ request, ref, setConfirmRidePanel, setRidePopUpPanel }) {
-    
-    return (
+function RideRequestPopup({
+  ride,
+  acceptRide,
+  ref,
+  setRidePopUpPanel,
+}) {
+  const passengerName = ride?.user?.fullname
+    ? `${ride.user.fullname.firstname} ${
+        ride.user.fullname.lastname || ""
+      }`.trim()
+    : ride?.user?.email || "Passenger Name";
+  const distance = ride?.distance ? `${ride.distance} km` : "N/A";
+  const pickup = ride?.pickup?.address || "Pickup Location";
+  const destination = ride?.destination?.address || "Destination";
+  const fare = ride?.fare || "N/A";
+  const currency = ride?.paymentDetails?.currency || "INR";
+
+  const acceptRideHandler = async () => {
+    await acceptRide();
+  };
+
+  return (
     <div className="fixed bottom-0 w-full" ref={ref}>
       <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
         {/* Header */}
@@ -22,11 +47,11 @@ function RideRequestPopup({ request, ref, setConfirmRidePanel, setRidePopUpPanel
               <FaUser className="text-gray-600 text-xl" />
             </div>
             <div>
-              <p className="font-semibold">{request?.passenger?.name || 'Passenger Name'}</p>
+              <p className="font-semibold">{passengerName}</p>
               <div className="flex items-center text-sm text-gray-600">
                 <span className="flex items-center">
                   <FaMapMarkerAlt className="mr-1 text-xs" />
-                  {request?.distance || '2.5 km'} away
+                  {distance} away
                 </span>
               </div>
             </div>
@@ -38,14 +63,14 @@ function RideRequestPopup({ request, ref, setConfirmRidePanel, setRidePopUpPanel
               <IoLocationSharp className="text-green-500 mt-1 mr-2" />
               <div>
                 <p className="text-xs text-gray-500">Pickup Location</p>
-                <p className="font-medium">{request?.pickup || '123 Main Street'}</p>
+                <p className="font-medium">{pickup}</p>
               </div>
             </div>
             <div className="flex items-start">
               <IoLocationSharp className="text-red-500 mt-1 mr-2" />
               <div>
                 <p className="text-xs text-gray-500">Destination</p>
-                <p className="font-medium">{request?.destination || '456 Central Park'}</p>
+                <p className="font-medium">{destination}</p>
               </div>
             </div>
           </div>
@@ -56,32 +81,29 @@ function RideRequestPopup({ request, ref, setConfirmRidePanel, setRidePopUpPanel
               <FaMoneyBillWave className="text-blue-600 mr-2" />
               <span className="text-gray-700">Fare</span>
             </div>
-            <span className="font-bold text-lg">₹{request?.fare || '250'}</span>
+            <span className="font-bold text-lg">
+              {currency} {fare}
+            </span>
           </div>
 
           {/* Action Buttons */}
           <div className="flex space-x-3">
-            
             <button
-              onClick={()=>setRidePopUpPanel(false)}
+              onClick={() => setRidePopUpPanel(false)}
               className="flex-1 flex items-center justify-center py-3 bg-red-100 text-red-600 rounded-lg font-medium"
             >
               <FaTimes className="mr-2" />
               Decline
             </button>
-            
+
             <button
-              onClick={()=> {
-                setConfirmRidePanel(true);
-              }
-              }
+              onClick={() => acceptRideHandler()}
               className="flex-1 flex items-center justify-center py-3 bg-green-600 text-white rounded-lg font-medium"
             >
               <FaCheck className="mr-2" />
               Accept
             </button>
           </div>
-
         </div>
       </div>
     </div>

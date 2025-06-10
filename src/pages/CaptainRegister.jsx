@@ -60,8 +60,8 @@ function CaptainRegister() {
           },
           id:data._id
         }
+        localStorage.setItem('captainToken', response.data.data.token);
         setCaptain(captainData); 
-        localStorage.setItem("captainToken", response.data.token);
         console.log("Registration successful:", response.data);
         navigate('/captain-home');
       }

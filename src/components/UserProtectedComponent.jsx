@@ -24,6 +24,7 @@ const UserProtectedWrapper = ({ children }) => {
           setUser({
             email: data.email,
             fullname: data.fullname,
+            id:data._id
           });
         }
       })

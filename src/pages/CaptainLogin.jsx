@@ -1,5 +1,5 @@
 import axios, { HttpStatusCode } from "axios";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CaptainDataContext } from "../context/CaptainContext";
 
@@ -19,13 +19,13 @@ function CaptainLogin() {
       password
     };
 
+
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/captain/login`, 
         submittedData,
         { withCredentials: true }
       );
-
       if (response.status === 200) {
         const data = response.data.data.captain;
         const captainInfo = {
@@ -42,13 +42,12 @@ function CaptainLogin() {
           },
           id:data._id
         };
-        
+        localStorage.setItem('captainToken', response.data.data.token);
         setCaptain(captainInfo);
-        localStorage.setItem('captainToken', response.data.token);
         navigate("/captain-home");
       }
     } catch (error) {
-      // Add user-friendly error handling here
+      // maybe add error handling here
       console.log(`login failed`,error);
       if (error.status === HttpStatusCode.Unauthorized) {
         setError("Invalid email or password.");
@@ -59,6 +58,10 @@ function CaptainLogin() {
   };
     
 
+  
+    useEffect(() => {
+  console.log("captain in CaptainHome:", captain);
+}, [captain]);
 
   return (
     <div className="min-h-screen flex flex-col justify-between items-center p-6 sm:p-8 bg-gray-50">

@@ -7,22 +7,73 @@ import TopBar from "../components/TopBar";
 import ConfirmRidePanel from "../components/ConfirmRidePanel";
 import { CaptainDataContext } from "../context/CaptainContext";
 import { SocketContext } from "../context/SocketContext";
+import { sendLocationUpdate } from "../utils/location_update";
+import { acceptRide as acceptRideApi } from "../apis/map.api";
 
 function CaptainHome() {
   const { captain, setCaptain } = useContext(CaptainDataContext);
 
   const [ridePopUpPanel, setRidePopUpPanel] = useState(false);
   const [confirmRidePanel, setConfirmRidePanel] = useState(false);
+  const [ride, setRide] = useState(null);
 
   const newRequestPopUpPanel = useRef();
   const confirmRidePanelRef = useRef();
 
   const socket = useContext(SocketContext);
 
+  const acceptRide = async () => {
+    try {
+      await acceptRideApi({
+        rideId: ride._id,
+        captainId: captain.id,
+      });
+      setConfirmRidePanel(true);
+    } catch (error) {
+      console.log(`Something went wrong while accpeting ride: ${error}`);
+    }
+  };
+
+  // New ride popup
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewRide = (data) => {
+      setRidePopUpPanel(true);
+      setRide(data);
+    };
+
+    socket.on("new-ride", handleNewRide);
+
+    return () => {
+      socket.off("new-ride", handleNewRide);
+    };
+  }, [socket]);
+
   // Setting captain socket id
   useEffect(() => {
-    socket.emit("join", { userType: "captain", userId: captain.id });
-  }, [captain]);
+    if (socket && captain && captain.id)
+      socket.emit("join", { userType: "captain", userId: captain.id });
+  }, [socket, captain]);
+
+  useEffect(() => {
+    if (socket && captain && captain.id) {
+      sendLocationUpdate({
+        socket,
+        userId: captain.id,
+        eventName: "update-location-captain",
+      });
+      const interval = setInterval(() => {
+        sendLocationUpdate({
+          socket,
+          userId: captain.id,
+          eventName: "update-location-captain",
+        });
+      }, 4000);
+
+      return () => clearInterval(interval);
+    }
+  }, [socket, captain]);
 
   useGSAP(() => {
     if (ridePopUpPanel) {
@@ -60,13 +111,6 @@ function CaptainHome() {
     gsap.set(newRequestPopUpPanel.current, { y: "100%" });
   }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setRidePopUpPanel(true);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div className="h-screen flex flex-col bg-gray-100">
       <TopBar />
@@ -82,6 +126,8 @@ function CaptainHome() {
       {/* Ride Request Popups */}
       <RideRequestPopup
         ref={newRequestPopUpPanel}
+        ride={ride}
+        acceptRide={acceptRide}
         setRidePopUpPanel={setRidePopUpPanel}
         setConfirmRidePanel={setConfirmRidePanel}
       />
@@ -89,8 +135,9 @@ function CaptainHome() {
       {/* ConfirmRidePanel */}
       <ConfirmRidePanel
         ref={confirmRidePanelRef}
-        setRidePopUpPanel={setRidePopUpPanel}
+        ride={ride}
         setConfirmRidePanel={setConfirmRidePanel}
+        setRidePopUpPanel={setRidePopUpPanel}
       />
     </div>
   );
