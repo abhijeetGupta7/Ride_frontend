@@ -16,6 +16,7 @@ import { VEHICLE_TYPES } from "../constants/vehicleTypes";
 import { SocketContext } from "../context/SocketContext";
 import { UserDataContext } from "../context/UserContext";
 import SearchingForDriverPanel from "../components/SearchingForDriverPanel";
+import LiveTracking from "../components/LiveTracking";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const UserDashboard = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [waitingForDriver, setWaitingForDriver] = useState(false);
   const [driverFound, setDriverFound] = useState(false);
-  const [rideDetails, setRideDetails] = useState(null); // <-- use this for all ride/driver info
+  const [rideDetails, setRideDetails] = useState(null); 
   const [driverStatus, setDriverStatus] = useState("null"); // null | 'searching' | 'coming' | riding
 
   const [locationSearchQuery, setLocationSearchQuery] = useState("");
@@ -116,6 +117,7 @@ const UserDashboard = () => {
       console.log("driver is found");
       setDriverFound(true);
       setRideDetails(data);
+      console.log(data);
       setDriverStatus("coming");
     };
 
@@ -131,15 +133,18 @@ const UserDashboard = () => {
 
     const handleRideStarted = (data) => {
       setRideDetails(data);
-      console.log("ride started");
       setDriverStatus("riding");
-      navigate("/riding");
+      navigate("/riding", {
+        state: {
+          rideDetails: data
+        }
+      });
     };
 
     socket.on("ride-started", handleRideStarted);
 
     return () => {
-      socket.off("ride-started", handleRideStarted); // ✅ Proper cleanup
+      socket.off("ride-started", handleRideStarted); 
     };
   }, [socket, navigate]);
 
@@ -188,9 +193,8 @@ const UserDashboard = () => {
       <TopBar />
 
       {/* Map Placeholder */}
-      <div className="absolute inset-0 flex justify-center items-center bg-gray-300">
-        <p>Map will appear here</p>
-      </div>
+        <LiveTracking />
+    
 
       {/* Main Location Input Panel */}
       <MainLocationPanel

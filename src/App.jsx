@@ -14,6 +14,7 @@ import Riding from "./pages/Riding.jsx";
 import CaptainProfile from "./pages/CaptainProfile.jsx";
 import CaptainHome from "./pages/CaptainHome.jsx";
 import CaptainRiding from "./pages/CaptainRiding.jsx";
+import Feedback from "./pages/Feedback.jsx";
 
 export default function App() {
   return (
@@ -30,6 +31,14 @@ export default function App() {
           </UserProtectedWrapper>
           }
         />
+
+        <Route path="/feedback" element={
+          <UserProtectedWrapper>
+            <Feedback/>
+          </UserProtectedWrapper>
+          }
+        />
+
         <Route path="/riding" element={
           <UserProtectedWrapper> 
             <Riding /> 

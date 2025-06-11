@@ -12,6 +12,7 @@ import { confirmRide } from "../apis/map.api";
 
 function ConfirmRidePanel({
   ride,
+  setRide,
   ref,
   setRidePopUpPanel,
   setConfirmRidePanel,
@@ -25,11 +26,17 @@ function ConfirmRidePanel({
     setLoading(true);
     setError("");
     try {
-      console.log('Confirming ride with OTP:', otp);
-      await confirmRide({ rideId: ride._id, otp });
+      console.log("Confirming ride with OTP:", otp);
+      const response=await confirmRide({ rideId: ride._id, otp });
+      const rideDetails=response.data.data;
+      setRide(rideDetails);
       setConfirmRidePanel(false);
       setRidePopUpPanel(false);
-      navigate("/captain-riding");
+      navigate("/captain-riding", {
+        state: {
+          rideDetails: ride
+        }
+      });
     } catch (err) {
       setError(
         err?.response?.data?.message ||
@@ -41,7 +48,9 @@ function ConfirmRidePanel({
   };
 
   const passengerName = ride?.user?.fullname
-    ? `${ride.user.fullname.firstname} ${ride.user.fullname.lastname || ""}`.trim()
+    ? `${ride.user.fullname.firstname} ${
+        ride.user.fullname.lastname || ""
+      }`.trim()
     : ride?.user?.email || "Passenger Name";
   const distance = ride?.distance ? `${ride.distance} km` : "N/A";
   const pickup = ride?.pickup?.address || "Pickup Location";
@@ -150,7 +159,7 @@ function ConfirmRidePanel({
             <button
               onClick={confirmRideHandler}
               className="flex-1 flex items-center justify-center py-3 bg-green-600 text-white rounded-lg font-medium"
-              disabled={loading || otp.length !== 5}
+              disabled={loading || otp.length !== 6}
             >
               <FaCheck className="mr-2" />
               {loading ? "Confirming..." : "Confirm"}

@@ -9,6 +9,7 @@ import { CaptainDataContext } from "../context/CaptainContext";
 import { SocketContext } from "../context/SocketContext";
 import { sendLocationUpdate } from "../utils/location_update";
 import { acceptRide as acceptRideApi } from "../apis/map.api";
+import LiveTracking from "../components/LiveTracking";
 
 function CaptainHome() {
   const { captain, setCaptain } = useContext(CaptainDataContext);
@@ -116,9 +117,7 @@ function CaptainHome() {
       <TopBar />
 
       {/* Map Section */}
-      <div className="h-2/3 bg-gray-400 flex items-center justify-center text-white text-2xl font-bold">
-        Map
-      </div>
+      <LiveTracking />
 
       {/* Driver details */}
       <DriverDetails />
@@ -136,6 +135,7 @@ function CaptainHome() {
       <ConfirmRidePanel
         ref={confirmRidePanelRef}
         ride={ride}
+        setRide={setRide}
         setConfirmRidePanel={setConfirmRidePanel}
         setRidePopUpPanel={setRidePopUpPanel}
       />

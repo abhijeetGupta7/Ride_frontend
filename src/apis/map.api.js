@@ -30,7 +30,6 @@ export const getTripFareDistanceDurationForAllVehicleTypes = async (
   }
 };
 
-
 export const createRide = async (pickup, destination, vehicleType) => {
   try {
     const userToken = localStorage.getItem("userToken");
@@ -55,7 +54,7 @@ export const createRide = async (pickup, destination, vehicleType) => {
 };
 
 export const acceptRide = async ({ rideId, captainId }) => {
-  const token = localStorage.getItem('captainToken');
+  const token = localStorage.getItem("captainToken");
   return axios.patch(
     `${import.meta.env.VITE_API_BASE_URL}/ride/accept`,
     { rideId, captainId },
@@ -67,13 +66,39 @@ export const acceptRide = async ({ rideId, captainId }) => {
 };
 
 export const confirmRide = async ({ rideId, otp }) => {
-    const token = localStorage.getItem("captainToken");
-    return axios.patch(
-      `${import.meta.env.VITE_API_BASE_URL}/ride/start`,
-      { rideId, otp },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      }
-    );
-  };
+  const token = localStorage.getItem("captainToken");
+  return axios.patch(
+    `${import.meta.env.VITE_API_BASE_URL}/ride/start`,
+    { rideId, otp },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true,
+    }
+  );
+};
+
+export const finishRide = async ({rideId}) => {
+  const token = localStorage.getItem("captainToken");
+  return axios.patch(
+    `${import.meta.env.VITE_API_BASE_URL}/ride/complete`,
+    { rideId },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true,
+    }
+  );
+}
+
+
+export const submitFeedback = async({rideId, feedback}) => {
+  const token = localStorage.getItem("userToken");
+  console.log(rideId, feedback)
+  return axios.patch(
+    `${import.meta.env.VITE_API_BASE_URL}/ride/feedback`,
+    { rideId, feedback },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true,
+    }
+  );
+}
