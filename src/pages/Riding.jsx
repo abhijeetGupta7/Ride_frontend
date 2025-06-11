@@ -68,7 +68,7 @@ function Riding() {
 
   return (
     <div className="h-screen relative bg-gray-100">
-      <TopBar />
+      <TopBar role={'user'} />
 
       {/* Map Section */}
       <LiveTracking />

@@ -114,7 +114,7 @@ function CaptainHome() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-100">
-      <TopBar />
+      <TopBar role={'captain'} />
 
       {/* Map Section */}
       <LiveTracking />

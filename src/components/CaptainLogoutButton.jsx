@@ -2,7 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { logoutCaptain } from '../utils/logoutCaptain';
 
-const CaptainLogoutButton = () => {
+const CaptainLogoutButton = ({className}) => {
     
     const navigate=useNavigate();
 
@@ -14,8 +14,12 @@ const CaptainLogoutButton = () => {
     }
 
     return (
-    <button className="bg-amber-200 p-3" onClick={handleLogout}> Logout Captain </button>
-  )
+   <button
+      onClick={handleLogout}
+      className={`bg-red-100 text-red-600 hover:bg-red-200 py-3 rounded-xl font-medium flex items-center justify-center ${className}`}
+    >
+      Logout
+    </button>  )
 }
 
 

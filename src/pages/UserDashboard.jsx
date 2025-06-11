@@ -190,7 +190,7 @@ const UserDashboard = () => {
   return (
     <div className="relative h-screen overflow-hidden bg-gray-100">
       {/* Top Navigation */}
-      <TopBar />
+      <TopBar role={'user'} />
 
       {/* Map Placeholder */}
         <LiveTracking />

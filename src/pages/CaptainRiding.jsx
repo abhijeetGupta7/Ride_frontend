@@ -45,7 +45,7 @@ function CaptainRiding() {
 
   return (
     <div className="h-screen relative bg-gray-100">
-      <TopBar />
+      <TopBar role={'captain'} />
 
       {/* Map Section */}
       <LiveTracking />

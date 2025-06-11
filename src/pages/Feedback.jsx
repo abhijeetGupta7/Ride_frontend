@@ -56,7 +56,7 @@ function Feedback() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <TopBar />
+      <TopBar role={'user'} />
       <div className="flex flex-col items-center justify-center flex-grow px-4">
         <div className="bg-white shadow-md rounded-2xl p-6 w-full max-w-md text-center">
           <h2 className="text-2xl font-bold mb-2 text-gray-800">
