@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import TopBar from "../components/TopBar";
-import { submitFeedback } from "../apis/map.api";
+import { submitFeedback } from "../apis/api";
 
 function Feedback() {
   const { state } = useLocation();

@@ -6,9 +6,10 @@ import { BrowserRouter } from "react-router-dom";
 import UserContext from "./context/UserContext.jsx";
 import CaptainContext from "./context/CaptainContext.jsx";
 import { SocketProvider } from "./context/SocketContext.jsx";
+import 'leaflet/dist/leaflet.css';
 
 createRoot(document.getElementById("root")).render(
-  // <StrictMode>
+  <StrictMode>
     <CaptainContext>
       <UserContext>
         <SocketProvider>
@@ -18,5 +19,5 @@ createRoot(document.getElementById("root")).render(
         </SocketProvider>
       </UserContext>
     </CaptainContext>
-  // </StrictMode>
+  </StrictMode>
 );

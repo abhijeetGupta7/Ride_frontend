@@ -1,35 +1,60 @@
+// LiveTracking.jsx (Leaflet version)
 import { useState, useEffect } from "react";
-import { LoadScript, GoogleMap, Marker } from "@react-google-maps/api";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { ZoomControl } from "react-leaflet";
 
 const containerStyle = {
   width: "100%",
-  height: "calc(100vh - 64px)",
+  height: "100%",
+  position: "relative",
+  top: 0,
+  left: 0,
+  zIndex: 0,
 };
 
-// Fallback position constants
-const ControlPosition = {
-  RIGHT_CENTER: window.google?.maps?.ControlPosition?.RIGHT_CENTER ?? 4
-};
+// Custom marker icon setup
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
+
+function ChangeView({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center);
+    }
+  }, [center, map]);
+
+  return null;
+}
 
 const LiveTracking = () => {
   const [currentPosition, setCurrentPosition] = useState(null);
   const [error, setError] = useState(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by your browser");
+      setIsLoading(false);
       return;
     }
 
     const updatePosition = (position) => {
       const { latitude, longitude } = position.coords;
       setCurrentPosition({ lat: latitude, lng: longitude });
+      setIsLoading(false);
     };
 
     const handleError = (err) => {
       console.error("Error watching position", err);
       setError("Unable to retrieve your location");
+      setIsLoading(false);
     };
 
     navigator.geolocation.getCurrentPosition(updatePosition, handleError);
@@ -42,35 +67,32 @@ const LiveTracking = () => {
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
-  if (error) return <div className="error-message">{error}</div>;
+  if (isLoading) return <div className="loading-message">Loading your location...</div>;
+  if (error) return <div className="error-message" style={{ color: 'red', padding: '1rem' }}>{error}</div>;
 
   return (
-    <LoadScript 
-      googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-      onLoad={() => setMapLoaded(true)}
-    >
-      {mapLoaded && (
-        <GoogleMap
-          mapContainerStyle={containerStyle}
-          center={currentPosition || { lat: 0, lng: 0 }}
-          zoom={15}
-          options={{
-            fullscreenControl: true,
-            zoomControl: true,
-            mapTypeControl: false,
-            streetViewControl: false,
-            fullscreenControlOptions: {
-              position: ControlPosition.RIGHT_CENTER,
-            },
-            zoomControlOptions: {
-              position: ControlPosition.RIGHT_CENTER,
-            },
-          }}
-        >
-          {currentPosition && <Marker position={currentPosition} />}
-        </GoogleMap>
-      )}
-    </LoadScript>
+    <div style={containerStyle} aria-label="Live tracking map">
+      <MapContainer
+        center={currentPosition || [51.505, -0.09]} 
+        zoom={15}
+        scrollWheelZoom={true}
+        style={{ height: "100%", width: "100%" }}
+        zoomControl={false}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {currentPosition && (
+          <Marker 
+            position={currentPosition} 
+            title="Your current location"
+          />
+        )}
+        <ChangeView center={currentPosition} />
+        <ZoomControl position="bottomright" />
+      </MapContainer>
+    </div>
   );
 };
 

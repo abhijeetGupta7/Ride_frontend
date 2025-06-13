@@ -11,7 +11,7 @@ function DriverDetails() {
     
         <div className="rounded-3xl shadow-xl w-full max-w-md p-3 space-y-4">
           
-          {/* Driver Info:  Make a componenet fo this */}  
+          {/* Driver Info: we can make a componenet fo this */}  
           <div className="flex items-center space-x-2"> 
             <img
               src="https://th.bing.com/th/id/OIP.Xb1aKpWnaP0v2eKYZBsxWgHaHa?w=173&h=180&c=7&r=0&o=5&pid=1.7"

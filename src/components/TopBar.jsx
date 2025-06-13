@@ -54,7 +54,7 @@ const TopBar = ({role}) => {
       {/* Top Bar */}
       <div className="absolute top-5 left-0 w-full px-5 z-10 flex items-center justify-between">
         <Link to={"/"}>
-          <h1 className="text-2xl font-extrabold text-white">Ridee</h1>
+          <h1 className="text-2xl font-extrabold text-black">Ridee</h1>
         </Link>
 
         {/* Profile Icon with Dropdown */}
@@ -64,7 +64,7 @@ const TopBar = ({role}) => {
             className="focus:outline-none"
             aria-label="Profile menu"
           >
-            <CgProfile className="text-4xl text-white cursor-pointer hover:text-gray-200 transition-colors" />
+            <CgProfile className="text-4xl text-black cursor-pointer hover:text-blue-700 transition-colors" />
           </button>
 
           {/* Dropdown Menu */}

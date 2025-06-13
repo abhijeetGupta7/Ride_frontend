@@ -5,7 +5,7 @@ function Home() {
     <div>
 
         {/* bg image */}
-        <div className='h-screen w-full flex flex-col items-center justify-between bg-[url(https://wallpaper.dog/large/5529102.jpg)] bg-cover bg-no-repeat bg-center' >
+        <div className='h-screen w-full flex flex-col items-center justify-between bg-[url(/Home.jpg)] bg-cover bg-no-repeat bg-center' >
             
             {/* title */}
             <h1 className='text-6xl font-bold text-white pt-5 tracking-widest'> Ridee </h1>

@@ -8,7 +8,7 @@ import {
 import { IoLocationSharp } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { confirmRide } from "../apis/map.api";
+import { confirmRide } from "../apis/api";
 
 function ConfirmRidePanel({
   ride,

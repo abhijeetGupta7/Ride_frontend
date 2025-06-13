@@ -8,10 +8,11 @@ import VehicleSelectionPanel from "../components/VehicleSelectionPanel";
 import DriverComingPanel from "../components/DriverComingPanel";
 import { useNavigate } from "react-router-dom";
 import {
+  cancelRideRequest,
   createRide,
   getAutoCompleteSuggestions,
   getTripFareDistanceDurationForAllVehicleTypes,
-} from "../apis/map.api";
+} from "../apis/api";
 import { VEHICLE_TYPES } from "../constants/vehicleTypes";
 import { SocketContext } from "../context/SocketContext";
 import { UserDataContext } from "../context/UserContext";
@@ -38,7 +39,7 @@ const UserDashboard = () => {
   const [vehicles, setVehicles] = useState([]);
 
   const socket = useContext(SocketContext);
-  const { user, setUser } = useContext(UserDataContext);
+  const { user } = useContext(UserDataContext);
 
   // Setting Socket id for user
   useEffect(() => {
@@ -103,9 +104,10 @@ const UserDashboard = () => {
   };
 
   const confirmRide = async () => {
-    await createRide(pickup, destination, selectedVehicle.type);
+    const ride=await createRide(pickup, destination, selectedVehicle.type);
+    setRideDetails(ride);
     setShowVehiclePanel(false);
-    setWaitingForDriver(true); // set Searching for driver(true)
+    setWaitingForDriver(true); 
     setDriverStatus("searching");
   };
 
@@ -148,7 +150,8 @@ const UserDashboard = () => {
     };
   }, [socket, navigate]);
 
-  const cancelSearch = () => {
+  const cancelSearch = async() => {
+    await cancelRideRequest(rideDetails._id);
     setWaitingForDriver(false);
     setDriverFound(false);
     setDriverStatus(null);

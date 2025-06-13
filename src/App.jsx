@@ -20,60 +20,76 @@ export default function App() {
   return (
     <div>
       <Routes>
-        <Route path="/profile" element={
-          <UserProtectedWrapper> 
-            <Profile /> 
-          </UserProtectedWrapper> } 
-         />
-        <Route path="/user/dashboard" element={
-          <UserProtectedWrapper>
-            <UserDashboard/>
-          </UserProtectedWrapper>
+        <Route
+          path="/profile"
+          element={
+            <UserProtectedWrapper>
+              <Profile />
+            </UserProtectedWrapper>
+          }
+        />
+        <Route
+          path="/user/dashboard"
+          element={
+            <UserProtectedWrapper>
+              <UserDashboard />
+            </UserProtectedWrapper>
           }
         />
 
-        <Route path="/feedback" element={
-          <UserProtectedWrapper>
-            <Feedback/>
-          </UserProtectedWrapper>
+        <Route
+          path="/feedback"
+          element={
+            <UserProtectedWrapper>
+              <Feedback />
+            </UserProtectedWrapper>
           }
         />
 
-        <Route path="/riding" element={
-          <UserProtectedWrapper> 
-            <Riding /> 
-          </UserProtectedWrapper> } 
-         />
+        <Route
+          path="/riding"
+          element={
+            <UserProtectedWrapper>
+              <Riding />
+            </UserProtectedWrapper>
+          }
+        />
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<UserLogin/>} />
-        <Route path="/register" element={<UserRegister/>} />
-        <Route path="/captain-login" element={<CaptainLogin/>} />
-        <Route path="/captain-register" element={<CaptainRegister/>} />
-        <Route path="/logout" element={<UserLogout/>}/>
-        
-        <Route path="/captain-profile" element={ 
-          <CaptainProtectedWrapper> 
-            <CaptainProfile/> 
-          </CaptainProtectedWrapper>
-          }/>
+        <Route path="/login" element={<UserLogin />} />
+        <Route path="/register" element={<UserRegister />} />
+        <Route path="/captain-login" element={<CaptainLogin />} />
+        <Route path="/captain-register" element={<CaptainRegister />} />
+        <Route path="/logout" element={<UserLogout />} />
 
-          <Route path="/captain-home" element={ 
-          <CaptainProtectedWrapper> 
-            <CaptainHome/>  
-          </CaptainProtectedWrapper>
-          }/>
+        <Route
+          path="/captain-profile"
+          element={
+            <CaptainProtectedWrapper>
+              <CaptainProfile />
+            </CaptainProtectedWrapper>
+          }
+        />
 
-          <Route path="/captain-riding" element={ 
-          <CaptainProtectedWrapper> 
-            <CaptainRiding/>  
-          </CaptainProtectedWrapper>
-          }/>
-          
-          
-        <Route path="/captain-logout" element={<CaptainLogout/>}/>
+        <Route
+          path="/captain-home"
+          element={
+            <CaptainProtectedWrapper>
+              <CaptainHome />
+            </CaptainProtectedWrapper>
+          }
+        />
 
+        <Route
+          path="/captain-riding"
+          element={
+            <CaptainProtectedWrapper>
+              <CaptainRiding />
+            </CaptainProtectedWrapper>
+          }
+        />
 
+        <Route path="/captain-logout" element={<CaptainLogout />} />
       </Routes>
     </div>
-  )
+  );
 }

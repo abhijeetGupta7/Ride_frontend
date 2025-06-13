@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import TopBar from "../components/TopBar";
 import { FaUser, FaMoneyBillWave, FaCar } from "react-icons/fa";
 import { IoLocationSharp } from "react-icons/io5";
-import { finishRide } from "../apis/map.api";
+import { finishRide } from "../apis/api";
 import LiveTracking from "../components/LiveTracking";
 
 function CaptainRiding() {

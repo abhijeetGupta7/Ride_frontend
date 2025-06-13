@@ -10,6 +10,7 @@ export const getAutoCompleteSuggestions = async (place) => {
     const data = response.data.data;
     return data.map((place) => place.prediction.description);
   } catch (error) {
+    console.log(error);
     return [];
   }
 };
@@ -26,6 +27,7 @@ export const getTripFareDistanceDurationForAllVehicleTypes = async (
     );
     return response.data.data;
   } catch (error) {
+    console.log(error);
     return null;
   }
 };
@@ -49,6 +51,7 @@ export const createRide = async (pickup, destination, vehicleType) => {
     );
     return response.data.data;
   } catch (error) {
+    console.log(error);
     return null;
   }
 };
@@ -77,7 +80,7 @@ export const confirmRide = async ({ rideId, otp }) => {
   );
 };
 
-export const finishRide = async ({rideId}) => {
+export const finishRide = async ({ rideId }) => {
   const token = localStorage.getItem("captainToken");
   return axios.patch(
     `${import.meta.env.VITE_API_BASE_URL}/ride/complete`,
@@ -87,12 +90,11 @@ export const finishRide = async ({rideId}) => {
       withCredentials: true,
     }
   );
-}
+};
 
-
-export const submitFeedback = async({rideId, feedback}) => {
+export const submitFeedback = async ({ rideId, feedback }) => {
   const token = localStorage.getItem("userToken");
-  console.log(rideId, feedback)
+  console.log(rideId, feedback);
   return axios.patch(
     `${import.meta.env.VITE_API_BASE_URL}/ride/feedback`,
     { rideId, feedback },
@@ -101,4 +103,18 @@ export const submitFeedback = async({rideId, feedback}) => {
       withCredentials: true,
     }
   );
-}
+};
+
+export const cancelRideRequest = async (rideId) => {
+  const token = localStorage.getItem("userToken");
+  console.log('Ride req cancelled by user',rideId)
+  return axios.patch(
+    `${import.meta.env.VITE_API_BASE_URL}/ride/cancel`,
+    { rideId },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true,
+    }
+  );
+};
+

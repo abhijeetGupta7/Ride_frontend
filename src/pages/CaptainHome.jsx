@@ -8,7 +8,7 @@ import ConfirmRidePanel from "../components/ConfirmRidePanel";
 import { CaptainDataContext } from "../context/CaptainContext";
 import { SocketContext } from "../context/SocketContext";
 import { sendLocationUpdate } from "../utils/location_update";
-import { acceptRide as acceptRideApi } from "../apis/map.api";
+import { acceptRide as acceptRideApi } from "../apis/api";
 import LiveTracking from "../components/LiveTracking";
 
 function CaptainHome() {
@@ -76,6 +76,39 @@ function CaptainHome() {
     }
   }, [socket, captain]);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleRideCancelled = (data) => {
+      setRide(null);
+      setRidePopUpPanel(false);
+      setConfirmRidePanel(false);
+    };
+
+    socket.on("ride-request-cancelled", handleRideCancelled);
+
+    return () => {
+      socket.off("ride-request-cancelled", handleRideCancelled);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleRideAlreadyAccepted = (data) => {
+      console.log('ride already accepted', data);
+      setRide(null);
+      setRidePopUpPanel(false);
+      setConfirmRidePanel(false);
+    };
+
+    socket.on("ride-request-already-accepted", handleRideAlreadyAccepted);
+
+    return () => {
+      socket.off("ride-request-already-accepted", handleRideAlreadyAccepted);
+    };
+  }, [socket]);
+
   useGSAP(() => {
     if (ridePopUpPanel) {
       gsap.to(newRequestPopUpPanel.current, {
@@ -114,7 +147,7 @@ function CaptainHome() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-100">
-      <TopBar role={'captain'} />
+      <TopBar role={"captain"} />
 
       {/* Map Section */}
       <LiveTracking />
