@@ -38,34 +38,35 @@ const LiveTracking = () => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser");
-      setIsLoading(false);
-      return;
-    }
+useEffect(() => {
+  if (!navigator.geolocation) {
+    setError("Geolocation is not supported by your browser");
+    setIsLoading(false);
+    return;
+  }
 
-    const updatePosition = (position) => {
+  const watchId = navigator.geolocation.watchPosition(
+    (position) => {
       const { latitude, longitude } = position.coords;
       setCurrentPosition({ lat: latitude, lng: longitude });
+      setError(null);
       setIsLoading(false);
-    };
-
-    const handleError = (err) => {
-      console.error("Error watching position", err);
-      setError("Unable to retrieve your location");
+    },
+    (err) => {
+      console.error("Location error:", err);
+      setError("Unable to retrieve your location. Please allow location access.");
       setIsLoading(false);
-    };
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    }
+  );
 
-    navigator.geolocation.getCurrentPosition(updatePosition, handleError);
-    const watchId = navigator.geolocation.watchPosition(
-      updatePosition,
-      handleError,
-      { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
-    );
+  return () => navigator.geolocation.clearWatch(watchId);
+}, []);
 
-    return () => navigator.geolocation.clearWatch(watchId);
-  }, []);
 
   if (isLoading) return <div className="loading-message">Loading your location...</div>;
   if (error) return <div className="error-message" style={{ color: 'red', padding: '1rem' }}>{error}</div>;
