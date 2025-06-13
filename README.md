@@ -1,5 +1,3 @@
-Your README.md is already well-structured and comprehensive, but I've made some refinements for better readability, consistency, and professionalism. Here's the optimized version:
-
 ```markdown
 # 🚕 Ridee – Frontend
 
