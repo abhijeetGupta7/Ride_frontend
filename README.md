@@ -1,4 +1,3 @@
-```markdown
 # 🚕 Ridee – Frontend
 
 **Ridee** is a real-time ride-sharing application frontend where users and drivers ("captains") can register, request rides, and track locations live on an interactive map. Built with React, Vite, Tailwind CSS, and WebSockets.
@@ -130,4 +129,5 @@ Recommended providers:
 
 > Developed with ❤️ by Abhijeet Gupta  
 > If you find this project useful, please consider giving it a ⭐!
-```
+
+---
