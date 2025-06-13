@@ -4,61 +4,68 @@ import axios, { HttpStatusCode } from "axios";
 import { useNavigate } from "react-router-dom";
 
 const CaptainProtectedWrapper = ({ children }) => {
-    const { captain, setCaptain } = useContext(CaptainDataContext);
-    const [isLoading, setLoading] = useState(true);
-    const navigate = useNavigate();
+  const { captain, setCaptain } = useContext(CaptainDataContext);
+  const [isLoading, setLoading] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
+  const navigate = useNavigate();
 
-    useEffect( () => {
-        const captainToken=localStorage.getItem('captainToken');
+  useEffect(() => {
+    const captainToken = localStorage.getItem("captainToken");
 
-        // Verify captain by calling profile endpoint
-        axios.get(`${import.meta.env.VITE_API_BASE_URL}/captain/profile`, {
-            withCredentials: true, // Include cookies in request
-            headers: {
-                Authorization: `Bearer ${captainToken}`
-            }
-        })
-        .then( (response) => {
-            if(response.status === HttpStatusCode.Ok) {
-                const data = response.data.data;
-                
-                setCaptain({
-                    fullname: {
-                        firstname: data.fullname.firstname,
-                        lastname: data.fullname.lastname || ''
-                    },
-                    email: data.email,
-                    vehicle: {
-                        color: data.vehicle.color,
-                        plate: data.vehicle.plate,
-                        capacity: data.vehicle.capacity,
-                        vehicleType: data.vehicle.vehicleType
-                    },
-                    id:data._id
-                });
-            }
-        })
-        .catch( (error) => {
-            console.error("Authentication error:", error);
-            localStorage.removeItem("captainToken");
-            setCaptain(null); // Clear captain context
-            navigate("/captain-login"); // Redirect to login
-        })
-        .finally( () => {
-            setLoading(false); // Hide loader once done
-        });
-    }, [navigate, setCaptain]);
-
-    // Show loading indicator while verifying captain
-    if(isLoading) {
-        return <div>Loading...</div>; // Show loading indicator while verifying captain
+    if (!captainToken) {
+      navigate("/captain-login", { replace: true });
+      return;
     }
 
-    return (
-        <>
-            {children} {/* Render protected children if authenticated */}
-        </>
-    );
-}
+    axios
+      .get(`${import.meta.env.VITE_API_BASE_URL}/captain/profile`, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${captainToken}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === HttpStatusCode.Ok) {
+          const data = response.data.data;
+
+          setCaptain({
+            fullname: {
+              firstname: data.fullname.firstname,
+              lastname: data.fullname.lastname || "",
+            },
+            email: data.email,
+            vehicle: {
+              color: data.vehicle.color,
+              plate: data.vehicle.plate,
+              capacity: data.vehicle.capacity,
+              vehicleType: data.vehicle.vehicleType,
+            },
+            id: data._id,
+          });
+
+          setIsVerified(true);
+        }
+      })
+      .catch((error) => {
+        console.error("Authentication error:", error);
+        localStorage.removeItem("captainToken");
+        setCaptain(null);
+        navigate("/captain-login", { replace: true });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [navigate, setCaptain]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isVerified) {
+    return null; // Prevent rendering children if not verified
+  }
+
+  return <>{children}</>;
+};
 
 export default CaptainProtectedWrapper;
